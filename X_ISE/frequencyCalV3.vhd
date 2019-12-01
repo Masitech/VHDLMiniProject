@@ -144,6 +144,7 @@ begin  -- start of rtl
 	variable U,T,H,Th,TTh,HTh : std_logic_vector(3 downto 0);
 	begin 
 	if RES = '1' then 
+		CounterReset <= '1';
 		second_1_Counter_s <= (others => '0');
 	elsif rising_edge(CLK) then 
 		if second_1_Counter_s = "10111110101111000010000000" then  -- its actall half second but rising + falling = 1 second 
@@ -175,7 +176,7 @@ end if;
 	
 	
 
-	sync_LD_S : process(CLK,RES) 
+	sync_LD_S : process(CLK) 
 	begin 
 		if RES = '1' then
 		 DE <= '0'; 

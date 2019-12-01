@@ -1,6 +1,9 @@
 Library IEEE;
 Use IEEE.std_logic_1164.All;
 Use IEEE.numeric_std.All;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_ARITH.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
 
 Entity PhaseShifter Is
 	Port (
@@ -32,41 +35,36 @@ Architecture rtl Of PhaseShifter Is
 	
 Begin
 
-	-- count CEA
-	CounterA0 : process(CEA,SI) 
-	begin 
-	if rising_edge(SI) then 
-		CEA_Counter1 <= 0;
-	elsif CEA = '0' then --low  
-		CEA_Counter1 <= CEA_Counter1 + 1;
-	end if;
-	end process;
 	
-	-- count CEA
-	CounterB1 : process(CEB,SI) 
+	CounterX : process(RES,CLK)
 	begin 
-	if falling_edge(SI) then
-		CEB_Counter1 <= 0;
-	elsif CEB = '0' then --low  
-		CEB_Counter1 <= CEB_Counter1 + 1;
-	end if;
-	
-	
-	end process;
-	CounterX : process(SI,CLK)
-	begin 
-	if rising_edge(CLK) then 
+	if RES = '1' then
+	 CEA_Counter1 <= 0;
+	 CEA_Counter2 <= 0;
+	 CEB_Counter1 <= 0;
+	 CEB_Counter2 <= 0;
+	elsif rising_edge(CLK) then
 		if SI = '0' then 
 			CEB_Counter2 <= 1;
 			CEA_Counter2 <= CEA_Counter2 + 1;
 			if CEA_Counter1 = CEA_Counter2 then 
 				TCU1 <= '1';
+				CEA_Counter1 <= 0;
+			end if;
+			
+			if CEB = '0' then -- increment counter CEB
+				CEB_Counter1 <= CEB_Counter1 + 1;
 			end if;
 		elsif SI = '1' then 
 			CEA_Counter2 <= 1;
 			CEB_Counter2 <= CEB_Counter2 + 1;
 			if CEB_Counter1 = CEB_Counter2 then
 				TCU1 <= '0';
+				CEB_Counter1 <= 0;
+			end if;
+			
+			if CEA = '0' then --incremnt counter CEA
+				CEA_Counter1 <= CEA_Counter1 + 1;
 			end if;
 		end if;
 	end if;

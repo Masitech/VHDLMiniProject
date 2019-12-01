@@ -22,16 +22,13 @@ signal segmentMux   : std_logic_vector(3 downto 0) := (others => '0');
 begin 
 
 
-process(DE)
+process(DE,RES)
 begin 
-	if rising_edge(DE) then 
+	if RES = '1' then 
+		DIGEN <= "0000"; 
+	elsif rising_edge(DE) then 
 		whichSegment <= whichSegment + 1;
 	end if;
-end process;
-
-
-process(whichSegment)
-begin 
 	case whichSegment is 
 	when "00"  =>
 		DIGEN <= "0111";

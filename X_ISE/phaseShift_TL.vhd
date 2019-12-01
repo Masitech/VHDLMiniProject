@@ -150,7 +150,7 @@ M_PhaseShifter : PhaseShifter
 	
 M_Freq_Cal : frequencyCal 
 	port map (
-		SI  => SENSOR_IN,
+		SI  => SI_s,
 		CLK => CLK_s,
 		RES => RES_s,
 		SW  => SW,
