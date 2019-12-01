@@ -27,7 +27,11 @@ begin
 	if rising_edge(DE) then 
 		whichSegment <= whichSegment + 1;
 	end if;
-	
+end process;
+
+
+process(whichSegment)
+begin 
 	case whichSegment is 
 	when "00"  =>
 		DIGEN <= "0111";

@@ -175,7 +175,7 @@ end if;
 	
 	
 
-	sync_LD_S : process(CLK) 
+	sync_LD_S : process(CLK,RES) 
 	begin 
 		if RES = '1' then
 		 DE <= '0'; 
