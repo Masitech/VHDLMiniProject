@@ -10,7 +10,8 @@ Entity PhaseShifter Is
 		RES : In std_logic;
 		--output
 		PHI_0 : Out std_logic;
-		PHI_90 : Out std_logic
+		PHI_90 : Out std_logic;
+		OFLOW : Out std_logic
 	);
 End;
 
@@ -26,10 +27,11 @@ Architecture rtl Of PhaseShifter Is
 	Signal TCU2 : std_logic;
 
 	Signal TCU_XNOR_SI : std_logic;
-	
+
 Begin
 	-- create toggle secondary clock
 	Toggle_create : Process (CLK, RES) Is
+		Variable toggleCounter : Integer Range 0 To 1;
 	Begin
 		If rising_edge(CLK) Then
 			If RES = '1' Then
@@ -40,95 +42,90 @@ Begin
 		End If;
 	End Process;
  
-
 	-- Create CEA, CEB Signal
 	CEX_logic : Process (TOGGLE, SI) Is
 	Begin
 		CEA <= (SI And TOGGLE) Or (Not SI);
 		CEB <= ((Not SI) And TOGGLE) Or SI;
 	End Process;
-		
-	
-	Counter : Process(CEA,CLK,SI,RES) 
-	variable eventCounterA1 : Integer  := 0; -- numeric
-	variable eventCounterA2 : Integer  := 0; -- numeric
-	variable enableReset	: boolean := true;
-	begin 
-	if RES = '1' then 
-		TCU1 <= '0';
-	elsif SI = '1' then
-		if enableReset = true then 
+ 
+	-- Counter A
+	CounterA : Process (CLK, CEA, RES, SI) Is
+		Variable eventCounterA1 : Integer  := 0; -- numeric
+		Variable eventCounterA2 : Integer  := 0; -- numeric
+	Begin
+		If RES = '1' Then
 			TCU1 <= '0';
-			eventCounterA1 := 0;
-			eventCounterA2 := 0;
-			enableReset := false;
-		elsif rising_edge(CEA) then 
-			eventCounterA1 := eventCounterA1 + 2;
-		else 
-		-- nothing
-		end if;
-		
-	elsif SI = '0' then 
-		if CLK = '1' then 
-			if eventCounterA1 = eventCounterA2 then 
-				TCU1 <= '1';
-				enableReset := true;
-			else 
-				eventCounterA2 := eventCounterA2 + 1;
+			else
+			-- reset counter, TCU1 LOW, disable counting
+			If rising_edge(SI) Then
+				eventCounterA1 := 0;
+				eventCounterA2 := 0;
+				TCU1 <= '0';
+			End If;
+ 
+			If falling_edge(SI) Then
+	
+			End If;
+ 
+			-- Is falling edge and counter is enabled then count. If it reaches the roll over value then. Set
+			If rising_edge(CEA) AND SI = '1' Then
+					eventCounterA1 := eventCounterA1 + 1;	
+			End If;
+			
+			if rising_edge(CLK) AND SI = '0' then
+					eventCounterA2 := eventCounterA2 + 1;
+					if eventCounterA2 = eventCounterA1 then
+						TCU1 <= '1'; -- output high
+					end if;
+				end if;
 			end if;
-		end if;
-	else 
-	--nothing
-	end if;
-	end process;
-	
-	
-	Counter2 : Process(CEB,CLK,SI,RES) 
-	variable eventCounterB1 : Integer  := 0; -- numeric
-	variable eventCounterB2 : Integer  := 0; -- numeric
-	variable enableResetB	: boolean := true;
-	begin 
-	if RES = '1' then 
-		TCU2 <= '0';
-	elsif SI = '0' then
-		if enableResetB = true then 
+	End Process;
+ 
+ 
+ 	-- Counter B
+	CounterB : Process (CLK, CEB, RES, SI) Is
+		Variable eventCounterB1 : Integer := 0; -- numeric
+		Variable eventCounterB2 : Integer := 0; -- numeric
+	Begin
+		If RES = '1' Then
 			TCU2 <= '0';
-			eventCounterB1 := 0;
-			eventCounterB2 := 0;
-			enableResetB := false;
-		elsif rising_edge(CEB) then 
-			eventCounterB1 := eventCounterB1 + 2;
-		else 
-		-- nothing
-		end if;
-		
-	elsif SI = '1' then 
-		if CLK = '1' then 
-			if eventCounterB1 = eventCounterB2 then 
-				TCU2 <= '1';
-				enableResetB := true;
-			else 
-				eventCounterB2 := eventCounterB2 + 1;
-			end if;
-		end if;
-	else 
-	--nothing
-	end if;
-	end process;
-	
+			else
 
-	
+			If falling_edge(SI) Then
+				eventCounterB1 := 0;
+				eventCounterB2 := 0;
+				TCU2 <= '0';
+			End If;
+ 
+			-- Is falling edge and counter is enabled then count. If it reaches the roll over value then. Set
+			If rising_edge(CEB) AND SI = '0' Then
+					eventCounterB1 := eventCounterB1 + 1;	
+			End If;
+			
+			if rising_edge(CLK) AND SI = '1' then
+					eventCounterB2 := eventCounterB2 + 1;
+					if eventCounterB2 = eventCounterB1 then
+						TCU2 <= '1'; -- output high
+					end if;
+				end if;
+			end if;
+	End Process;
+
 	-- generate output dual D-FF.
 	PHI_OUTPUT : Process (CLK, RES)
 	Begin
-
+		if rising_edge(CLK) then
+		TCU_XNOR_SI <= (TCU1 OR TCU2) XNOR SI;
+ 		end if;
 		If RES = '1' Then
 			PHI_0 <= '0';
 			PHI_90 <= '0';
-		elsif rising_edge(CLK) Then
-			TCU_XNOR_SI <= (TCU1 OR TCU2) XNOR SI;
-			PHI_0 <= SI;
-			PHI_90 <= TCU_XNOR_SI;
+		Else
+			If rising_edge(CLK) Then
+				PHI_0 <= SI;
+				PHI_90 <= TCU_XNOR_SI;
+			End If;
 		End If;
 	End Process;
  
