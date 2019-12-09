@@ -1,0 +1,26 @@
+@note: top-level test bench can be used to simulate all of the individual files 
+@note: Where it says _short on the file name indicates the simulation has not ran for the full time frame of >1 second
+
+Phase Shifter 
+- Simulate for at least 5 ms since the SI signal is quite slow. Then Zoom out a lot. 
+
+Top Level Phase Shift
+- Need to simulate at least for 1 second. This will take a very long time, hence i did a short simulation. This is because SI is sampled 
+for 1 second before the frequency is calculated and displayed on the screen. 
+
+Frequency Calculator 
+- Again has to be simulated for 1 second or more (above reason) 
+
+Display Interface 
+- Can be difficult to understand, it works. 
+
+bCounter 
+- No special requirement. TB only up to x1000 to get data for x100000 to use the top-level test bench
+Div2 
+- No special requirement 
+
+Sync
+- No special requirement 
+
+Sync 2
+- No special requirement 
