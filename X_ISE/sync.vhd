@@ -1,28 +1,31 @@
--- Library
-library IEEE;
-use IEEE.STD_LOGIC_1164.ALL;
--- Entity Declaration (D type Flip Flip) 
-entity sync is
-    Port ( 
-    CLR         : in  std_logic;   -- D
-    CLK         : in  std_logic;   -- CLOCK
-    RESET       : in  std_logic;   -- Active High Reset
-    RES         : out std_logic    -- Output 
-    );
-end sync;
+-- Author : Masum Ahmed 
+-- Email  : Ma786@kent.ac.uk
+-- Date   : 04/12/2019
+-- File Info : acts as a buffer from clr button on the fpga dev board to the logic units.
+-- This will reduce noise from button debounce + synch design implementation
 
+LIBRARY IEEE;
+USE IEEE.STD_LOGIC_1164.ALL;
+-- Entity Declaration (D type Flip Flip)
+ENTITY sync IS
+   PORT
+   (
+      CLR    : IN std_logic; -- D
+      CLK    : IN std_logic; -- CLOCK
+      RESET  : IN std_logic; -- Active High Reset
+      RES    : OUT std_logic -- Output
+   );
+END sync;
 -- Architecture Declaration
-architecture rtl of sync is
-begin
--- Process Declaration
-process (CLK, RESET)
-begin
--- Clock Rise Edge
-  if rising_edge (CLK) then
-    RES <= CLR;  -- Input becomes the output during rising edge. 
-	end if ;
-end process ;
--- END
-end rtl;
-
-
+ARCHITECTURE rtl OF sync IS
+BEGIN
+   -- Process Declaration
+   PROCESS (CLK, RESET)
+   BEGIN
+      -- Clock Rise Edge
+      IF rising_edge (CLK) THEN
+         RES <= CLR; -- Input becomes the output during rising edge.
+      END IF;
+   END PROCESS;
+   -- END
+END rtl;
